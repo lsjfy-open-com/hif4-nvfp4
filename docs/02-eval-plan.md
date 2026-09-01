@@ -110,3 +110,43 @@ H2 packing 若硬件拒绝非 Algorithm-1 的 metadata，只能停在 `cpu-ref` 
 4. 上述 run 的设备标签齐全。
 
 满模型 8 任务与 910B 属于下一阶段。
+
+
+## 7. 赛题与 Hugging Face 数据（2026-09-01 补）
+
+IEEE ICME 2026 Low Bit-width Large Model Quantization Challenge：<https://challenge.gccorg.com/>。这是 HiF4 的官方赛题，**主榜不是 Llama 文本任务**。
+
+### 7.1 Sub-Challenge 1（主榜，W4A4 推理）
+
+- 格式：HiF4 或 MXFP4；HiF4 最多 2 个 Transformer block 留高精度，MXFP4 最多 5 个。
+- 模型：`Wan-AI/Wan2.2-I2V-A14B`（Hugging Face）。
+- 数据：
+  - 校准 / 生成：[`BestWishYsh/OpenS2V-5M`](https://huggingface.co/datasets/BestWishYsh/OpenS2V-5M)（约 5M 条 720P subject-text-video）。
+  - 评测子集：[`BestWishYsh/OpenS2V-Eval`](https://huggingface.co/datasets/BestWishYsh/OpenS2V-Eval)（180 prompts）。
+- 指标：VBench（imaging / aesthetic / overall consistency / subject consistency / motion smoothness）。HiF4 相对 BF16 平均 VBench 损失须 < 0.5% 才进排名。
+- 建议分辨率：720×1280×61。
+
+社区已发的对照权重（同一模型族，可做 HiF4 vs NVFP4 视频侧对照，**不能**替代本仓库的 LLM linear/attention 金丝雀）：
+
+- [`ReopenAI/Wan2.2-I2V-14B-HiF4`](https://huggingface.co/ReopenAI/Wan2.2-I2V-14B-HiF4)
+- [`nvidia/Wan2.2-T2V-A14B-Diffusers-NVFP4`](https://huggingface.co/nvidia/Wan2.2-T2V-A14B-Diffusers-NVFP4)
+- [`rockerBOO/wan2.2-I2V-A14B-nvfp4`](https://huggingface.co/rockerBOO/wan2.2-I2V-A14B-nvfp4)
+- [`BitsPlease/HiSQRot4`](https://huggingface.co/BitsPlease/HiSQRot4)（含 `data/prompts/OpenS2V-5M_to_mm_vbench_30.json`）
+- [`lightx2v/Wan2.2-NVFP4-Sparse`](https://huggingface.co/lightx2v/Wan2.2-NVFP4-Sparse)
+
+官方仿真库：<https://github.com/global-computing-consortium/HiFloat4>。参赛复现仓示例：<https://github.com/GCC-HiFloat/PTQ_Wan2.2>。
+
+### 7.2 Mini-Challenge（更接近本仓库的 LLM 适配）
+
+不进主榜，但可申 Innovation Award。
+
+- W4A4 mini：参考模型 Pangu-72B-2512。下游：SuperGPQA、IF-Eval、AIME2025、LiveCodeBench V6、BFCL-V3。目标：相对 BF16 平均精度损失 ≤ 1%。
+- W8A8 mini（HiF8）：模型 OpenPangu-1B；训练数据 [`HuggingFaceFW/fineweb`](https://huggingface.co/datasets/HuggingFaceFW/fineweb)（参赛复现常用 `sample-10BT`）。下游：MMLU、GSM8K、MATH500、HellaSwag、ARC、PIQA。
+
+这些 Hugging Face 任务卡可直接喂 lm-eval，作为本仓库 Llama/Qwen/Mistral 计划的**并集**，不要丢掉现有 ARC/BoolQ/WikiText-2 canary。
+
+### 7.3 对本仓库的用法
+
+- **现在（cpu-ref / linear+attention）**：继续 WikiText-2 + 8 任务；把 Mini-Challenge 的 SuperGPQA / IF-Eval / AIME2025 标成第二阶段 LLM 集。
+- **若要对齐赛题榜**：另开 `wan22-hif4` 路径，校准用 OpenS2V-5M 小子集（参赛方案里出现过 ~98 prompts），生成用 OpenS2V-Eval，打 VBench。那是视频 DiT，不是 LLM attention score 的替代实验。
+- 不要把 OpenS2V-5M 全量（5M 视频）拉进 cpu-ref。

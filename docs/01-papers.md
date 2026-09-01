@@ -82,3 +82,12 @@
 3. 2607.04422 §3.5 / Table 2 / Appendix C（attention 分割）。
 4. 2604.08826 §3–§5（Ascend 预训练 extras 差异）。
 5. 本仓库 [`00-formal-model.md`](00-formal-model.md) 的 H1/H2/H3。
+
+
+## ICME 2026 赛题与 Hugging Face 资源
+
+- 官网：<https://challenge.gccorg.com/>
+- Sub-Challenge 1：Wan2.2-I2V-A14B 上 HiF4/MXFP4 W4A4；数据 [`BestWishYsh/OpenS2V-5M`](https://huggingface.co/datasets/BestWishYsh/OpenS2V-5M)、[`BestWishYsh/OpenS2V-Eval`](https://huggingface.co/datasets/BestWishYsh/OpenS2V-Eval)；指标 VBench。
+- Mini-Challenge 训练：[`HuggingFaceFW/fineweb`](https://huggingface.co/datasets/HuggingFaceFW/fineweb)。
+- 论文页（无关联数据集）：<https://huggingface.co/papers/2602.11287>
+- 参赛/社区权重：ReopenAI/Wan2.2-I2V-14B-HiF4；nvidia/Wan2.2-T2V-A14B-Diffusers-NVFP4；BitsPlease/HiSQRot4。

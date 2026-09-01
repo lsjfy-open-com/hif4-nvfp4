@@ -33,3 +33,9 @@
   - H2（PTS 目标）：对原矩阵 MSE 高于 HiF4 直转（两级量化叠加）；对 NVFP4 反量化 MSE 与 HiF4 直转同量级；**精确命中率约 6.8%**（18 张均在 6.7–6.9%）。符合「一般不能精确嵌入」。
 - **未做**：MXFP4；Llama WikiText-2 canary；RHT / SR / 2D 16×16；cuda-sim / 910B。
 
+## 2026-09-01 晚（CST）
+
+- 确认赛题为 IEEE ICME 2026 Low Bit-width Large Model Quantization Challenge（https://challenge.gccorg.com/）。
+- Hugging Face 主数据：`BestWishYsh/OpenS2V-5M`、`BestWishYsh/OpenS2V-Eval`、`HuggingFaceFW/fineweb`。
+- 主榜是 Wan2.2 I2V + VBench，不是 Llama 文本；Mini-Challenge 才是 Pangu + SuperGPQA/IF-Eval/AIME 等。
+- 已写入 `docs/02-eval-plan.md` §7。未下载 5M 视频。
