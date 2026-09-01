@@ -1,0 +1,80 @@
+# Local Mini-Challenge LLM protocol.
+# IEEE ICME 2026 registration is CLOSED — this file is not a contest signup.
+# Do not clone HiFloat4 / ICME-Demo / VBench into this repo; links only.
+
+protocol: mini-challenge-local
+icme_registration: closed
+
+# Eval-plan §0. cuda-sim = same cpu-ref formulas, GEMM on CUDA.
+device_tags:
+  - cpu-ref
+  - cuda-sim
+
+defaults:
+  # Tiny randomly-initialized Transformer. Llama-2-7B is opt-in:
+  #   --model llama2-7b   or   HIF4_EVAL_MODEL=meta-llama/Llama-2-7b-hf
+  model: smoke
+  format: hif4          # hif4 | nvfp4_pts | bf16
+  quant: W+A            # W-only | W+A
+  scope: linear-only    # QKV/O + FFN GEMM; QK^T / PV high precision
+  quantize_qk: false    # +attention-score (eval plan §3.2); PV stays high precision
+
+# Formal model §6 / eval plan §2: do not fake-quant these.
+high_precision:
+  - embedding
+  - lm_head
+  - softmax
+  - pv                  # P V matmul; v_proj is still a linear and is quantized
+
+canary:
+  name: wikitext2_word_ppl
+  dataset: Salesforce/wikitext
+  config: wikitext-2-raw-v1
+  split: test
+  metric: word_ppl
+  run_first: true
+  note: >
+    Eval plan §2 canary. Requires a real tokenizer (Llama-2-7B opt-in).
+    Smoke model runs synthetic-smoke word PPL instead; that is not WikiText-2.
+
+# W8A8 mini overlap + eval-plan subset. Run via lm-eval when installed.
+lm_eval_subset:
+  - name: hellaswag
+    lm_eval: [hellaswag]
+  - name: arc_easy
+    lm_eval: [arc_easy]
+  - name: arc_challenge
+    lm_eval: [arc_challenge]
+  - name: piqa
+    lm_eval: [piqa]
+  - name: mmlu
+    lm_eval: [mmlu]
+
+# Official W4A4 Mini-Challenge names (contest-entry.md §2.C).
+# Skip with a reason when the lm-eval task or dataset is missing — do not invent scores.
+mini_challenge_w4a4:
+  - name: SuperGPQA
+    lm_eval: [supergpqa, super_gpqa]
+  - name: IFEval
+    lm_eval: [ifeval, leaderboard_ifeval]
+  - name: AIME2025
+    lm_eval: [aime2025, aime_2025, leaderboard_math_aime2025]
+  - name: LiveCodeBench
+    lm_eval: [livecodebench, livecodebench_v6]
+  - name: BFCL
+    lm_eval: [bfcl, bfcl_v3, berkeley_function_call_leaderboard]
+
+mini_challenge_w8a8:
+  - mmlu
+  - gsm8k
+  - math500
+  - hellaswag
+  - arc
+  - piqa
+
+# Linked, not vendored.
+external_repos:
+  HiFloat4: https://github.com/global-computing-consortium/HiFloat4
+  ICME-Demo: https://github.com/global-computing-consortium/ICME-Demo
+  VBench: https://github.com/Vchitect/VBench
+  PTQ_Wan2.2: https://github.com/GCC-HiFloat/PTQ_Wan2.2

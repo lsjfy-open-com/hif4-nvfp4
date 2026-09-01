@@ -5,16 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hif4-nvfp4"
 version = "0.1.0"
-description = "CPU reference (cpu-ref) HiF4 / NVFP4 quantizers and Gaussian MSE harness"
+description = "CPU reference (cpu-ref) HiF4 / NVFP4 quantizers, Gaussian MSE, and Mini-Challenge LLM eval harness"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
+eval = ["torch", "pyyaml"]
+eval-full = ["torch", "pyyaml", "transformers>=4.40", "datasets", "lm-eval"]
 
 [project.scripts]
 hif4-gaussian-mse = "hif4_nvfp4.gaussian_mse:main"
+hif4-mini-challenge-eval = "hif4_nvfp4.eval.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
