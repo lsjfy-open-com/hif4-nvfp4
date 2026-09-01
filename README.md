@@ -27,6 +27,7 @@ NVFP4 用更细的 16 元块与 FP8 浮点 scale 换精度，但 inter-group 动
 | [`docs/02-eval-plan.md`](docs/02-eval-plan.md) | Gaussian MSE、LLM PTQ、消融、CPU/CUDA sim vs Ascend 910B |
 | [`docs/lab-log.md`](docs/lab-log.md) | 实验与建模日志 |
 | [`docs/dataflow.html`](docs/dataflow.html) | 格式 / 打包 / attention / 评测数据流图 |
+| [`docs/contest-entry.md`](docs/contest-entry.md) | ICME 已关；VBench / OpenS2V / Mini-Challenge 测试入口 |
 
 ## 工作约定
 
