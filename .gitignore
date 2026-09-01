@@ -10,3 +10,5 @@ venv/
 *.bin
 *.safetensors
 runs/
+eval_results/
+

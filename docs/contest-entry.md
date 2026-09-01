@@ -56,16 +56,49 @@ W4A4 mini（Pangu-72B-2512，目标：相对 BF16 平均精度损失 ≤ 1%）�
 
 W8A8 mini（OpenPangu-1B + `HuggingFaceFW/fineweb` sample-10BT）：MMLU / GSM8K / MATH500 / HellaSwag / ARC / PIQA。
 
-本仓库第一轮仍用更小的金丝雀：Llama-2-7B + WikiText-2，通过后再上 mini 任务表。
+本仓库第一轮用 **tiny smoke Transformer** 把 Mini-Challenge 协议跑通（CI / pytest，无 7B 权重）。Llama-2-7B + WikiText-2 是 opt-in，见 §4。
 
 ## 3. 建议测试顺序
 
 1. 已有：`cpu-ref` 高斯 MSE（PR #1）。
-2. LLM：WikiText-2 canary → mini 任务表。
-3. 要对齐赛题视频指标：Wan2.2 + OpenS2V-Eval 180 → 本地 VBench → 可选交 VBench HF 榜。
-4. 不要把 5M 视频或 14B 权重下载到这个 cpu-ref 环境。
+2. 本仓库 LLM harness：tiny smoke 模型上 WikiText-2 canary 路径 + Mini-Challenge 任务表（数据缺失则 skip）。
+3. Opt-in：Llama-2-7B WikiText-2 word PPL，再 lm-eval subset。
+4. 要对齐赛题视频指标：Wan2.2 + OpenS2V-Eval 180 → 本地 VBench → 可选交 VBench HF 榜。那是视频 DiT，**不是**本仓库 linear/attention 实验。
+5. 不要把 5M 视频或 14B 权重下载到这个 cpu-ref 环境；不要 clone HiFloat4 / ICME-Demo / VBench 进本仓库（只留链接）。
 
 对照权重（生成侧 HiF4 vs NVFP4，不是 LLM attention 替代实验）：
 
 - https://huggingface.co/ReopenAI/Wan2.2-I2V-14B-HiF4
 - https://huggingface.co/nvidia/Wan2.2-T2V-A14B-Diffusers-NVFP4
+
+## 4. 本仓库本地 Mini-Challenge harness
+
+IEEE ICME 2026 **不要报名**。本仓库能跑的是 linear + optional QKᵀ 的 LLM 协议（embedding / lm_head / softmax / PV 保持高精度），不是 Wan2.2 + VBench。
+
+配置：[`configs/mini_challenge.yaml`](../configs/mini_challenge.yaml)  
+脚本：[`scripts/mini_challenge_eval.py`](../scripts/mini_challenge_eval.py)
+
+量化走已有 `cpu-ref` 公式（[`src/hif4_nvfp4/hif4.py`](../src/hif4_nvfp4/hif4.py) Algorithm 1；[`src/hif4_nvfp4/nvfp4.py`](../src/hif4_nvfp4/nvfp4.py) TE + PTS peak-to-2688）。`--device cuda-sim` 只把 GEMM 放到 CUDA，量化器仍是 cpu-ref；没有 GPU 时拒绝并报错，不会改标成 cpu-ref。
+
+```bash
+pip install -e ".[dev,eval]"
+# CI / 默认：随机初始化 tiny Transformer，不拉 7B
+python scripts/mini_challenge_eval.py --model smoke --format hif4 --device cpu-ref
+python scripts/mini_challenge_eval.py --model smoke --format nvfp4_pts --device cpu-ref
+# +attention-score（量化 QKᵀ；PV 仍高精度）。默认关。
+python scripts/mini_challenge_eval.py --model smoke --quantize-qk
+
+# Llama-2-7B 是 opt-in（需 HF 权限；失败则 skip，不编造 PPL）
+pip install -e ".[eval-full]"
+python scripts/mini_challenge_eval.py --model llama2-7b --format hif4
+# 或: HIF4_EVAL_MODEL=meta-llama/Llama-2-7b-hf
+```
+
+跑序与 [`docs/02-eval-plan.md`](02-eval-plan.md) 一致：先 WikiText-2 word PPL canary，再 lm-eval subset（hellaswag / arc_easy / arc_challenge / piqa / mmlu）。YAML 里写明 Mini-Challenge W4A4 名：SuperGPQA / IFEval / AIME2025 / LiveCodeBench / BFCL；缺数据集或 lm-eval 任务时 **skip + 原因**，不填假分。
+
+外部仿真/赛题仓（链接，不 clone）：
+
+- HiFloat4：https://github.com/global-computing-consortium/HiFloat4
+- ICME-Demo：https://github.com/global-computing-consortium/ICME-Demo
+- VBench：https://github.com/Vchitect/VBench
+

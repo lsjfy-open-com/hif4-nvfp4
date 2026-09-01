@@ -31,8 +31,28 @@ NVFP4 用更细的 16 元块与 FP8 浮点 scale 换精度，但 inter-group 动
 
 ## 工作约定
 
-- 不发明未在文献中出现的数字；评测数字一律标来源或标「待测」。
-- 代码与 kernel 在建模与 eval plan 冻结后再写。
+- 不发明未在文献中出现的数字；评测数字一律标来源或标「待测」。跳过的任务必须写原因，禁止填假分数。
+- 量化公式只使用 [`docs/00-formal-model.md`](docs/00-formal-model.md) 已写入的 Algorithm 1 / TE 式。IEEE ICME 2026 **不要报名**（已关榜）。
+
+## 如何跑
+
+```bash
+pip install -e ".[dev]"
+pytest
+python -m hif4_nvfp4.gaussian_mse
+
+# Mini-Challenge LLM protocol（默认 tiny smoke 模型，无需 7B 权重）
+pip install -e ".[dev,eval]"
+python scripts/mini_challenge_eval.py --model smoke --format hif4 --device cpu-ref --skip-lm-eval
+# 完整任务表（lm-eval 未装或数据缺失时 skip，不编造分数）
+python scripts/mini_challenge_eval.py --model smoke --format hif4 --device cpu-ref
+
+# Llama-2-7B 是 opt-in（需 Hugging Face 权限与 eval-full）
+# pip install -e ".[eval-full]"
+# HIF4_EVAL_MODEL=meta-llama/Llama-2-7b-hf python scripts/mini_challenge_eval.py --model llama2-7b --format hif4
+```
+
+说明见 [`docs/contest-entry.md`](docs/contest-entry.md)。不要把 HiFloat4 / ICME-Demo / VBench clone 进本仓库。
 
 ## 关键来源（摘要）
 

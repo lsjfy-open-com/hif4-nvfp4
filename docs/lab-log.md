@@ -39,3 +39,15 @@
 - Hugging Face 主数据：`BestWishYsh/OpenS2V-5M`、`BestWishYsh/OpenS2V-Eval`、`HuggingFaceFW/fineweb`。
 - 主榜是 Wan2.2 I2V + VBench，不是 Llama 文本；Mini-Challenge 才是 Pangu + SuperGPQA/IF-Eval/AIME 等。
 - 已写入 `docs/02-eval-plan.md` §7。未下载 5M 视频。
+
+## 2026-09-01（CST）续：Mini-Challenge 本地 eval harness
+
+- **阶段**：本地 Mini-Challenge LLM 协议（ICME 2026 已关，未报名、未 clone HiFloat4 / ICME-Demo / VBench）。
+- **产物**：
+  - `configs/mini_challenge.yaml`：canary = WikiText-2 word PPL；lm-eval subset = hellaswag / arc_easy / arc_challenge / piqa / mmlu；W4A4 文档名 SuperGPQA / IFEval / AIME2025 / LiveCodeBench / BFCL（缺数据则 skip）。
+  - `src/hif4_nvfp4/eval/`：沿 K 的 cpu-ref HiF4（Algorithm 1）与 NVFP4+PTS（TE，peak-to-2688）假量化包装 `nn.Linear`；默认不量化 QKᵀ；embedding / lm_head / softmax / PV 保持高精度。
+  - `scripts/mini_challenge_eval.py`：设备标签 `cpu-ref` 或 `cuda-sim`（无 CUDA 则拒绝，不改标签）。
+  - 默认模型：tiny 随机 Transformer（`d_model=64`，2 layer）。Llama-2-7B 仅 `--model llama2-7b` 或 `HIF4_EVAL_MODEL` opt-in；下载失败 skip 并提示改用 smoke。
+- **如何跑**：`pip install -e ".[dev,eval]"`；`pytest`；`python scripts/mini_challenge_eval.py --model smoke --format hif4 --device cpu-ref`。
+- **本机**：pytest 在 smoke 模型上跑通（无 7B 权重）。WikiText-2 在 smoke tokenizer 上标 skipped（不是假 PPL）；synthetic-smoke word PPL 有限。未跑 Llama-2-7B，无新的文献对照分数。
+- **未做**：满 WikiText-2 + Llama-2-7B canary 数字；910B；视频 VBench；clone 外部仓。
