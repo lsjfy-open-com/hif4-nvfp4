@@ -90,8 +90,8 @@ def run_lm_eval(
             entries,
             group=group,
             reason=(
-                "lm-eval subset is skipped for the randomly-initialized smoke model "
-                "(scores would not be a Mini-Challenge result). Use --model llama2-7b."
+                "randomly-initialized smoke model is not a Mini-Challenge result "
+                "(no pretrained weights). Use --model llama2-7b for lm-eval / W4A4 names."
             ),
         )
     if wrapped_model is None or tokenizer is None:

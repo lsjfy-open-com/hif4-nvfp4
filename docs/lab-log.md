@@ -48,6 +48,9 @@
   - `src/hif4_nvfp4/eval/`：沿 K 的 cpu-ref HiF4（Algorithm 1）与 NVFP4+PTS（TE，peak-to-2688）假量化包装 `nn.Linear`；默认不量化 QKᵀ；embedding / lm_head / softmax / PV 保持高精度。
   - `scripts/mini_challenge_eval.py`：设备标签 `cpu-ref` 或 `cuda-sim`（无 CUDA 则拒绝，不改标签）。
   - 默认模型：tiny 随机 Transformer（`d_model=64`，2 layer）。Llama-2-7B 仅 `--model llama2-7b` 或 `HIF4_EVAL_MODEL` opt-in；下载失败 skip 并提示改用 smoke。
-- **如何跑**：`pip install -e ".[dev,eval]"`；`pytest`；`python scripts/mini_challenge_eval.py --model smoke --format hif4 --device cpu-ref`。
-- **本机**：pytest 在 smoke 模型上跑通（无 7B 权重）。WikiText-2 在 smoke tokenizer 上标 skipped（不是假 PPL）；synthetic-smoke word PPL 有限。未跑 Llama-2-7B，无新的文献对照分数。
+- **如何跑**：`pip install -e ".[dev,eval]"`；`pytest`（76 passed，含 smoke harness）；`python scripts/mini_challenge_eval.py --model smoke --format hif4 --device cpu-ref`。
+- **本机一次 smoke run**（设备 `cpu-ref`，HiF4 W+A linear-only，tiny random Transformer；**不是** WikiText-2 / 不是 Mini-Challenge 榜分）：
+  - `wikitext2_word_ppl`: skipped（smoke tokenizer 不是 WikiText）。
+  - `smoke_word_ppl`: word_ppl ≈ **170.4**，n_words=25，corpus=`synthetic-smoke`。
+  - hellaswag / ARC / PIQA / MMLU 与 SuperGPQA / IFEval / AIME2025 / LiveCodeBench / BFCL：skipped（随机模型 + 无 lm-eval 数据），均带原因，无假分。
 - **未做**：满 WikiText-2 + Llama-2-7B canary 数字；910B；视频 VBench；clone 外部仓。

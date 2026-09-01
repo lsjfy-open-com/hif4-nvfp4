@@ -85,7 +85,7 @@ def test_run_eval_smoke_cpu_ref_no_fake_scores():
     assert d["scope"] == "linear-only"
     assert "pv" in d["high_precision"]
     assert "lm_head" in d["high_precision"]
-    assert d["error"] is None
+    assert d.get("error") is None
 
     canary = {c["name"]: c for c in d["canary"]}
     assert canary["wikitext2_word_ppl"]["status"] == "skipped"
